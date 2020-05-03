@@ -1,0 +1,15 @@
+{
+    "id": "5eaf34a1338850001b946811",
+    "regions": ["sfo2"],
+    "functions": [
+        {
+            "handler": "hello.js",
+            "http": {
+                "method": ["GET", "POST"],
+                "path": "/:message"
+            },
+            "name": "hello-fn",
+            "timeout": "60000"
+        }
+    ]
+}

@@ -1,0 +1,15 @@
+{
+  "private":true,
+  "name": "cats-api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "debug": "node --nolazy --inspect-brk=9229 index.js"
+  },
+  "dependencies": {
+    "path-to-regexp": "6.1.0",
+    "querystring": "0.2.0",
+    "r2": "2.0.1"
+  }
+}
