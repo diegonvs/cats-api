@@ -58,7 +58,6 @@ async function loadImage(sub_id) {
 		console.error(e);
 	}
 
-	debugger;
 	return response;
 }
 
