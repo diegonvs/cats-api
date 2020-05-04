@@ -1,6 +1,8 @@
 'use strict';
 
 const {pathToRegexp} = require('path-to-regexp');
+const errorPage = require('./pages/errorPage');
+const indexPage = require('./pages/index');
 const querystring = require("querystring");
 const r2 = require("r2");
 const url = require('url');
@@ -17,16 +19,15 @@ async function messageReceived(message) {
 
 	const image = images[0];
 
-	console.log(image);
-
 	const breed = image.breeds[0];
 
-	console.log("message processed", "showing", breed);
-
 	return (
-		"***" + breed.name + "*** \r *" + breed.temperament + "*",
-		{ files: [image.url] }
+		{
+			...breed,
+			imageUrl: image.url
+		}
 	);
+
 	} catch (error) {
 		console.error(error);
 	}
@@ -70,5 +71,9 @@ module.exports = async (req, res) => {
 
 	const data = await messageReceived(message);
 
-	res.send({ message: JSON.stringify(data) });
+	if (data && data !== {}) {
+		return res.type('text/html').status(200).send(indexPage(data));
+	} else {
+		return res.type('text/html').status(404).send(errorPage());
+	}
 };
