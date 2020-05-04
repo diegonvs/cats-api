@@ -1,3 +1,3 @@
-const hello = require('./hello');
+const hello = require('./dist/hello');
 
 hello();

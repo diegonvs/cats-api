@@ -4,8 +4,7 @@ const {pathToRegexp} = require('path-to-regexp');
 const errorPage = require('./pages/errorPage');
 const indexPage = require('./pages/index');
 const querystring = require("querystring");
-const r2 = require("r2");
-const url = require('url');
+const fetch = require('node-fetch');
 
 const CAT_API_URL = "https://api.thecatapi.com/";
 const CAT_API_KEY = "c719095c-b407-4ae0-982a-3b041adebcc4";
@@ -13,9 +12,12 @@ const CAT_API_KEY = "c719095c-b407-4ae0-982a-3b041adebcc4";
 /**
  * Called whenever a message is posted into the same channel as the Bot
  */
-async function messageReceived(message) {
-  try {
-	const images = await loadImage(message);
+async function messageReceived(message = '') {
+	const {images, HAS_ERROR} = await loadImage(message);
+
+	if (HAS_ERROR) {
+		return images;
+	}
 
 	const image = images[0];
 
@@ -27,11 +29,8 @@ async function messageReceived(message) {
 			imageUrl: image.url
 		}
 	);
-
-	} catch (error) {
-		console.error(error);
-	}
 }
+
 /**
  * Makes a request to theCATApi.com for a random dog image with breed info attached.
  */
@@ -50,30 +49,50 @@ async function loadImage(sub_id) {
 
 	let queryString = querystring.stringify(query_params);
 
+	let HAS_ERROR = false;
+
+	var response;
+
 	try {
 		let _url = CAT_API_URL + `v1/images/search?${queryString}`;
 
-		var response = await r2.get(_url, { headers }).json;
+		response = await fetch(_url, { headers });
+
+		response = await response.json();
 
 	} catch (e) {
-		console.error(e);
+		HAS_ERROR = true;
+		response = `
+		Error:
+			${e}\n
+
+		<br />
+
+		Stacktrace:
+			${e.stack}\n
+
+		<br />
+
+		Message:
+			${e.message}\n
+
+		<br />
+		`;
 	}
 
-	return response;
+	return {images: response, HAS_ERROR};
 }
 
 const URL_REGEX = pathToRegexp("/:message");
 
 module.exports = async (req, res) => {
-	const q = url.parse(req.url, true);
-
-	const [_, message] = URL_REGEX.exec(q.pathname);
+	const [_, message] = req && req.path ? URL_REGEX.exec(req.path) : URL_REGEX.exec(req.url);
 
 	const data = await messageReceived(message);
 
-	if (data && data !== {}) {
+	if (typeof data === 'object' && data !== {}) {
 		return res.type('text/html').status(200).send(indexPage(data));
 	} else {
-		return res.type('text/html').status(404).send(errorPage());
+		return res.type('text/html').status(404).send(errorPage(data));
 	}
 };

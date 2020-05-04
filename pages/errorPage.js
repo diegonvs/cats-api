@@ -1,4 +1,4 @@
-module.exports = () => `
+module.exports = (data) => `
     <!doctype html>
     <html>
         <head>
@@ -8,7 +8,18 @@ module.exports = () => `
         <body>
             <h1>Houston, We have a problem.</h1>
 
-            <p>Something is wrong. Please, try again later.</p>
+            <section>
+                <p>Something is wrong. Please, try again later.</p>
+            </section>
+
+            <br />
+
+            <div>
+                <p>Error: </p>
+                <code style="background-color: crimson; color: white;">
+                    ${data}
+                </code>
+            </div>
         </body>
     </html>
 `;
